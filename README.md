@@ -1,13 +1,10 @@
 # jenkins-auto-setup
 Create VM with Vagrant and configure Jenkins with Ansible
 
-Prerequisites:
+## Prerequisites:
 
 - Vagrant
-- Ansible / optional depending on installation tool chosen (ansible role, or bash script).
-
- If not installed: `sudo apt update && sudo apt install -y ansible`
-
+- Ansible: sudo apt update && sudo apt install -y ansible
 - Ansible `jenkins` role from `geerlingguy` installed: `ansible-galaxy install geerlingguy.jenkins`. Confirm `ansible-galaxy list`
 
 ## How does it work:
