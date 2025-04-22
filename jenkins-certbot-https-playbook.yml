@@ -4,18 +4,22 @@
   become: true
 
   vars:
+    java_packages:
+      # - openjdk-17-jdk
+      - openjdk-21-jdk
     jenkins_http_port: 8080
-    jenkins_hostname: jenkins.example.com
+    jenkins_hostname: mydomain.com
     certbot_create_if_missing: true
-    certbot_admin_email: your-email@example.com
+    certbot_admin_email: mymail@example.com
     certbot_auto_renew: true
     certbot_certs:
-      - email: your-email@example.com
+      - email: mymail@example.com
         domains:
-          - jenkins.example.com
+          - mydomain.com
         webroot: /var/lib/jenkins
 
   roles:
+    - geerlingguy.java
     - geerlingguy.jenkins
     - geerlingguy.certbot
 
@@ -32,16 +36,16 @@
         content: |
           server {
               listen 80;
-              server_name jenkins.example.com;
+              server_name mydomain.com;
               return 301 https://$host$request_uri;
           }
 
           server {
               listen 443 ssl;
-              server_name jenkins.example.com;
+              server_name mydomain.com;
 
-              ssl_certificate /etc/letsencrypt/live/jenkins.example.com/fullchain.pem;
-              ssl_certificate_key /etc/letsencrypt/live/jenkins.example.com/privkey.pem;
+              ssl_certificate /etc/letsencrypt/live/mydomain.com/fullchain.pem;
+              ssl_certificate_key /etc/letsencrypt/live/mydomain.com/privkey.pem;
 
               location / {
                   proxy_pass http://localhost:8080;
