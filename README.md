@@ -7,6 +7,7 @@ Create VM with Vagrant and configure Jenkins with Ansible
 - Ansible: sudo apt update && sudo apt install -y ansible
 - Ansible `jenkins` role from `geerlingguy` installed: `ansible-galaxy install geerlingguy.jenkins`. Confirm `ansible-galaxy list`. I have it called `ansible-role-jenkins`. If your local role name differs, make sure you define it accordingly in `jenkins.yaml`.
 - Ansible `certbot` role from `geerlingguy` installed: `ansible-galaxy install geerlingguy.certbot`. Confirm `ansible-galaxy list`. I have it called `ansible-role-certbot`. If your local role name differs, make sure you define it accordingly in `jenkins.yaml`.
+- Ansible `java` role. Similar to above roles.
 
   OR
   install the roles using `requirements.yml`:
@@ -23,3 +24,4 @@ Initiate provisioning running `vagrant up`.
 When Jenkins configuration is completed, the initial admin passwordpassword output will be displayed.
 
 
+-----
