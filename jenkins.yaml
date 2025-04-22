@@ -2,3 +2,4 @@
   become: true
   roles:
     - ansible-role-jenkins
+    - ansible-role-certbot
