@@ -1,0 +1,69 @@
+---
+- name: Install Jenkins with HTTPS using Certbot
+  hosts: jenkins
+  become: true
+
+  vars:
+    jenkins_http_port: 8080
+    jenkins_hostname: jenkins.example.com
+    certbot_create_if_missing: true
+    certbot_admin_email: your-email@example.com
+    certbot_auto_renew: true
+    certbot_certs:
+      - email: your-email@example.com
+        domains:
+          - jenkins.example.com
+        webroot: /var/lib/jenkins
+
+  roles:
+    - geerlingguy.jenkins
+    - geerlingguy.certbot
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Configure Nginx for Jenkins HTTPS reverse proxy
+      copy:
+        dest: /etc/nginx/sites-available/jenkins
+        content: |
+          server {
+              listen 80;
+              server_name jenkins.example.com;
+              return 301 https://$host$request_uri;
+          }
+
+          server {
+              listen 443 ssl;
+              server_name jenkins.example.com;
+
+              ssl_certificate /etc/letsencrypt/live/jenkins.example.com/fullchain.pem;
+              ssl_certificate_key /etc/letsencrypt/live/jenkins.example.com/privkey.pem;
+
+              location / {
+                  proxy_pass http://localhost:8080;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+              }
+          }
+
+    - name: Enable Jenkins Nginx config
+      file:
+        src: /etc/nginx/sites-available/jenkins
+        dest: /etc/nginx/sites-enabled/jenkins
+        state: link
+
+    - name: Remove default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
