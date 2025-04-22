@@ -1,11 +1,10 @@
 ---
-- name: Install Jenkins with HTTPS using Certbot
+- name: Install Jenkins with HTTPS using Certbot and admin login preset
   hosts: jenkins
   become: true
 
   vars:
     java_packages:
-      # - openjdk-17-jdk
       - openjdk-21-jdk
     jenkins_http_port: 8080
     jenkins_hostname: mydomain.com
@@ -24,6 +23,26 @@
     - geerlingguy.certbot
 
   tasks:
+    - name: Harden Jenkins security (create admin + disable anonymous access)
+      copy:
+        dest: /var/lib/jenkins/init.groovy.d/security.groovy
+        content: |
+          import jenkins.model.*
+          import hudson.security.*
+
+          def instance = Jenkins.getInstance()
+
+          def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+          hudsonRealm.createAccount("admin", "SuperSecret123!")
+          instance.setSecurityRealm(hudsonRealm)
+
+          def strategy = new GlobalMatrixAuthorizationStrategy()
+          strategy.add(Jenkins.ADMINISTER, "admin")
+          instance.setAuthorizationStrategy(strategy)
+
+          instance.save()
+      notify: Restart Jenkins
+
     - name: Install Nginx
       apt:
         name: nginx
@@ -71,3 +90,9 @@
       service:
         name: nginx
         state: reloaded
+
+  handlers:
+    - name: Restart Jenkins
+      service:
+        name: jenkins
+        state: restarted
